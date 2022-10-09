@@ -44,14 +44,14 @@ def getDischargeData():
     discharge_array = []
     for discharge_date in (start_date + timedelta(n) for n in range(day_count)):
         number_of_discharges = len(care_teams[care_teams['DISCH_DT_TM']== discharge_date]['FIN'].unique())
-        discharge_obj = {'date':str(discharge_date), 'discharges':str(number_of_discharges)}
+        formated_date = (discharge_date.strftime("%m/%d/%y"))
+        discharge_obj = {'date':str(formated_date), 'discharges':str(number_of_discharges)}
         discharge_array.append(discharge_obj)
     
-    print(discharge_array)
     return json.dumps(discharge_array)
 
 
-getDischargeInfo()
+
 
 
 
@@ -76,7 +76,7 @@ def upload_form():
     return discharge_info, 200
 
 
-@app.route('/discharges', methods=['POST'])
+@app.route('/discharges', methods=['GET'])
 def dischargeData():
     discharge_data = getDischargeData()
     return discharge_data, 200
