@@ -60,7 +60,7 @@ def getDischargeData():
 
 
 def getCareTeamData(fin):
-    care_team_members = care_teams[care_teams['FIN'] == fin]
+    care_team_members = care_teams[care_teams['FIN'] == fin].sort_values(['POST_APPT'])
     team_array=[]
     for ind in care_team_members.index:
         date = care_team_members['DISCH_DT_TM'][ind]
