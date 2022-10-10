@@ -26,7 +26,7 @@ care_teams = pd.read_csv('filtered2.csv', parse_dates=['DISCH_DT_TM','PREV_APPT'
 # filtered_teams.to_csv('filtered2.csv')
 
 
-
+print(care_teams)
 
 
 # create obj with date, fin number and careteam size
@@ -46,7 +46,7 @@ def getFinInfoGivenDate(discharge_date):
     return json.dumps(care_team_array)
 
 def getDischargeData():
-
+    print('care teams ', care_teams)
     start_date = pd.to_datetime('8/1/2022')
     day_count = 31
     discharge_array = []
@@ -56,7 +56,12 @@ def getDischargeData():
         discharge_obj = {'date':str(formated_date), 'discharges':str(number_of_discharges)}
         discharge_array.append(discharge_obj)
     
+    print(discharge_array)
     return json.dumps(discharge_array)
+
+
+
+
 
 def getCareTeamData(fin):
     care_team_members = care_teams[care_teams['FIN'] == fin]
@@ -87,18 +92,6 @@ def getCareTeamData(fin):
     print(team_array)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 def create_response(message, status):
     response = {
         'message': message
@@ -124,11 +117,11 @@ def upload_form():
 
 
 @app.route('/careteams', methods=['POST'])
-def care_teams():
+def get_care_teams():
     fin = getFin(request.json)
     # discharge_info = getFinInfoGivenDate(date_requested)
     # print('discharge info ', discharge_info)
-    return {'message':'got it'}, 200
+    return json.dumps({'message':'got it'}), 200
 
 
 @app.route('/discharges', methods=['GET'])
@@ -139,4 +132,4 @@ def dischargeData():
 
 
 
-# app.run(host='0.0.0.0', port=5000)
+app.run(host='0.0.0.0', port=5000)
