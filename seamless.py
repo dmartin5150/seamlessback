@@ -26,7 +26,6 @@ care_teams = pd.read_csv('filtered2.csv', parse_dates=['DISCH_DT_TM','PREV_APPT'
 # filtered_teams.to_csv('filtered2.csv')
 
 
-print(care_teams)
 
 
 # create obj with date, fin number and careteam size
@@ -42,11 +41,9 @@ def getFinInfoGivenDate(discharge_date):
         care_team_array.append(care_team_obj)
  
 
-    print (care_team_array)
     return json.dumps(care_team_array)
 
 def getDischargeData():
-    print('care teams ', care_teams)
     start_date = pd.to_datetime('8/1/2022')
     day_count = 31
     discharge_array = []
@@ -56,7 +53,6 @@ def getDischargeData():
         discharge_obj = {'date':str(formated_date), 'discharges':str(number_of_discharges)}
         discharge_array.append(discharge_obj)
     
-    print(discharge_array)
     return json.dumps(discharge_array)
 
 
@@ -65,7 +61,6 @@ def getDischargeData():
 
 def getCareTeamData(fin):
     care_team_members = care_teams[care_teams['FIN'] == fin]
-    npis = care_team_members['PROVIDER_NPI'].unique()
     team_array=[]
     for ind in care_team_members.index:
         date = care_team_members['DISCH_DT_TM'][ind]
@@ -88,8 +83,9 @@ def getCareTeamData(fin):
         'next':str(next)}
 
         team_array.append(care_team_obj)
+    return json.dumps(team_array)
         
-    print(team_array)
+
 
 
 def create_response(message, status):
@@ -104,7 +100,7 @@ def get_date(request):
     return date_requested
 
 def getFin(request):
-    fin = pd.to_numeric(request)
+    fin = int(request["fin"])
     return fin
 
 @app.route('/', methods=['POST'])
@@ -112,16 +108,15 @@ def upload_form():
     print(request.json)
     date_requested = get_date(request.json)
     discharge_info = getFinInfoGivenDate(date_requested)
-    print('discharge info ', discharge_info)
     return discharge_info, 200
 
 
-@app.route('/careteams', methods=['POST'])
+@app.route('/careteam', methods=['POST'])
 def get_care_teams():
+    print('careteam request ', request.json)
     fin = getFin(request.json)
-    # discharge_info = getFinInfoGivenDate(date_requested)
-    # print('discharge info ', discharge_info)
-    return json.dumps({'message':'got it'}), 200
+    care_team_data = getCareTeamData(fin)
+    return care_team_data, 200
 
 
 @app.route('/discharges', methods=['GET'])
