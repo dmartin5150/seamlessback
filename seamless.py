@@ -1,4 +1,5 @@
 # from collections import _OrderedDictValuesView
+from calendar import c
 from dis import disco
 import os
 import datetime as dt
@@ -18,7 +19,14 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
 
-care_teams = pd.read_csv('careteams.csv', parse_dates=['DISCH_DT_TM','PREV_APPT','POST_APPT'])
+care_teams = pd.read_csv('filtered2.csv', parse_dates=['DISCH_DT_TM','PREV_APPT','POST_APPT'])
+# filtered = ['Expired']
+
+# filtered_teams = care_teams[(care_teams['E_DISCH_DISPOSITION_DISP'].isin(filtered)) == False]
+# filtered_teams.to_csv('filtered2.csv')
+
+
+
 
 
 # create obj with date, fin number and careteam size
@@ -50,6 +58,42 @@ def getDischargeData():
     
     return json.dumps(discharge_array)
 
+def getCareTeamData(fin):
+    care_team_members = care_teams[care_teams['FIN'] == fin]
+    npis = care_team_members['PROVIDER_NPI'].unique()
+    team_array=[]
+    for ind in care_team_members.index:
+        date = care_team_members['DISCH_DT_TM'][ind]
+        fin = care_team_members['FIN'][ind]
+        type = care_team_members['E_ENCNTR_TYPE_DISP'][ind]
+        disp = care_team_members['E_DISCH_DISPOSITION_DISP'][ind]
+        lname = care_team_members['PROVIDER_LASTNAME'][ind]
+        fname = care_team_members['PROVIDER_FIRSTNAME'][ind]
+        specialty = care_team_members['PROVIDER_SPECIALTY'][ind]
+        address = care_team_members['PROVIDER_ADDRESS'][ind]
+        city= care_team_members['PROVIDER_CITY'][ind]
+        state = care_team_members['PROVIDER_STATE'][ind]
+        zip = care_team_members['PROVIDER_ZIP'][ind]
+        phone = care_team_members['PROVIDER_PHONE'][ind]
+        last = care_team_members['PREV_APPT'][ind]
+        next = care_team_members['POST_APPT'][ind]
+        care_team_obj = {'date':str(date), 'fin':str(fin), 'type':str(type), 'disp':str(disp),
+        'lname':str(lname),'fname':str(fname),'specialty':str(specialty), 'address':str(address),
+        'city':str(city), 'state':str(state), 'zip':str(zip), 'phone':str(phone), 'last':str(last),
+        'next':str(next)}
+
+        team_array.append(care_team_obj)
+        
+    print(team_array)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -66,6 +110,9 @@ def get_date(request):
     print('date requested:', date_requested)
     return date_requested
 
+def getFin(request):
+    fin = pd.to_numeric(request)
+    return fin
 
 @app.route('/', methods=['POST'])
 def upload_form():
@@ -76,6 +123,14 @@ def upload_form():
     return discharge_info, 200
 
 
+@app.route('/careteams', methods=['POST'])
+def care_teams():
+    fin = getFin(request.json)
+    # discharge_info = getFinInfoGivenDate(date_requested)
+    # print('discharge info ', discharge_info)
+    return {'message':'got it'}, 200
+
+
 @app.route('/discharges', methods=['GET'])
 def dischargeData():
     discharge_data = getDischargeData()
@@ -84,4 +139,4 @@ def dischargeData():
 
 
 
-app.run(host='0.0.0.0', port=5000)
+# app.run(host='0.0.0.0', port=5000)
