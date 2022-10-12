@@ -96,7 +96,7 @@ def getProviders(letter):
     for ind in providers.index:
         id =  providers['PROVIDER_NPI'][ind]
         npi = providers['PROVIDER_NPI'][ind]
-        name = providers['PROVIDER_FIRSTNAME'][ind] + ' ' + providers['PROVIDER_LASTNAME'][ind]
+        name = str(providers['PROVIDER_FIRSTNAME'][ind]) + ' ' + str(providers['PROVIDER_LASTNAME'][ind])
         size = len(care_teams[care_teams['PROVIDER_NPI']== npi]['FIN'].unique())
         providerObj = {'id':str(id), 'npi':str(npi), 'name':str(name),'size':str(size)}
         provider_array.append(providerObj)
@@ -105,21 +105,12 @@ def getProviders(letter):
     return json.dumps(provider_array)
 
 
-#         npi: "1",
-        # fname: "David",
-        # lname: "Martin",
-        # specialty:'Internal Medicine',
-        # fin: "5555555",
-        # discharge: "8/4/2022",
-        # disp: "To Home",
-        # prev: '8/2/2020',
-        # next: '9/3/2020'
 
 def getPatients(npi):
     if npi == '':
         print('no npi')
         return []
-    providers = care_teams.loc[care_teams['PROVIDER_NPI'] == npi].copy()
+    providers = care_teams.loc[care_teams['PROVIDER_NPI'] == npi].sort_values(['DISCH_DT_TM']).copy()
     providers.drop_duplicates(subset=['FIN'], inplace=True)
     provider_array = []
     for ind in providers.index:
@@ -132,7 +123,7 @@ def getPatients(npi):
         disp = providers['E_DISCH_DISPOSITION_DISP'][ind]
         prev = providers['PREV_APPT'][ind]
         next = providers['POST_APPT'][ind]
-        providerObj = {'fin':str(fin), 'npi':str(npi), 'fname':str(fname),'lname':str(lname),
+        providerObj = {'id':str(npi),'fin':str(fin), 'npi':str(npi), 'fname':str(fname),'lname':str(lname),
         'specialty':str(specialty),'discharge':str(discharge.strftime("%m/%d/%y")),'disp':str(disp), 'prev':str(prev),
         'next':str(next)}
         provider_array.append(providerObj)
@@ -158,7 +149,8 @@ def getFin(request):
     return fin
 
 def getNPI(request):
-    npi = int(request["NPI"])
+    intNPI = request["NPI"].split('.')[0]
+    npi = int(intNPI)
     return npi
 
 def getFirstLetter(request):
