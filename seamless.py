@@ -60,6 +60,9 @@ def getDischargeData():
 
 
 def getCareTeamData(fin):
+    now = dt.datetime.now()
+
+    current_time = now.strftime("%H:%M:%S")
     care_team_members = care_teams[care_teams['FIN'] == fin].sort_values(['POST_APPT'])
     team_array=[]
     for ind in care_team_members.index:
@@ -80,9 +83,10 @@ def getCareTeamData(fin):
         care_team_obj = {'date':str(date), 'fin':str(fin), 'type':str(type), 'disp':str(disp),
         'lname':str(lname),'fname':str(fname),'specialty':str(specialty), 'address':str(address),
         'city':str(city), 'state':str(state), 'zip':str(zip), 'phone':str(phone), 'last':str(last),
-        'next':str(next)}
+        'next':str(next),'time':str(current_time)}
 
         team_array.append(care_team_obj)
+    print(team_array)
     return json.dumps(team_array)
         
 
