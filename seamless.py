@@ -118,6 +118,10 @@ def getFin(request):
     fin = int(request["fin"])
     return fin
 
+def getFirstLetter(request):
+    first_letter = str(request["letter"])
+    return first_letter
+
 @app.route('/', methods=['POST'])
 def upload_form():
     print(request.json)
@@ -141,7 +145,8 @@ def dischargeData():
 
 @app.route('/providers', methods=['POST'])
 def getProviderList():
-    provider_list = getProviders(str(request.json))
+    first_letter = getFirstLetter(request.json)
+    provider_list = getProviders(first_letter)
     return provider_list, 200
 
 
