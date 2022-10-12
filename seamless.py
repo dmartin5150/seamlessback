@@ -86,6 +86,21 @@ def getCareTeamData(fin):
     return json.dumps(team_array)
         
 
+def getProviders(letter):
+    providers = care_teams.loc[care_teams['PROVIDER_LASTNAME'].str.startswith(letter)].copy()
+    providers.drop_duplicates(subset=['PROVIDER_NPI'], inplace=True)
+    provider_array = []
+    for ind in providers.index:
+        id =  providers['PROVIDER_NPI'][ind]
+        npi = providers['PROVIDER_NPI'][ind]
+        name = providers['PROVIDER_FIRSTNAME'][ind] + ' ' + providers['PROVIDER_LASTNAME'][ind]
+        size = len(care_teams[care_teams['PROVIDER_NPI']== npi]['FIN'].unique())
+        providerObj = {'id':str(id), 'npi':str(npi), 'name':str(name),'size':str(size)}
+        provider_array.append(providerObj)
+
+    return json.dumps(provider_array)
+
+
 
 
 def create_response(message, status):
@@ -124,7 +139,10 @@ def dischargeData():
     discharge_data = getDischargeData()
     return discharge_data, 200
 
-
+@app.route('/providers', methods=['POST'])
+def getProviderList():
+    provider_list = getProviders(str(request.json))
+    return provider_list, 200
 
 
 app.run(host='0.0.0.0', port=5000)
