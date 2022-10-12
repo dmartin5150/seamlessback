@@ -100,10 +100,45 @@ def getProviders(letter):
         size = len(care_teams[care_teams['PROVIDER_NPI']== npi]['FIN'].unique())
         providerObj = {'id':str(id), 'npi':str(npi), 'name':str(name),'size':str(size)}
         provider_array.append(providerObj)
-        
+
     print(provider_array)
     return json.dumps(provider_array)
 
+
+#         npi: "1",
+        # fname: "David",
+        # lname: "Martin",
+        # specialty:'Internal Medicine',
+        # fin: "5555555",
+        # discharge: "8/4/2022",
+        # disp: "To Home",
+        # prev: '8/2/2020',
+        # next: '9/3/2020'
+
+def getPatients(npi):
+    if npi == '':
+        print('no npi')
+        return []
+    providers = care_teams.loc[care_teams['PROVIDER_NPI'] == npi].copy()
+    providers.drop_duplicates(subset=['FIN'], inplace=True)
+    provider_array = []
+    for ind in providers.index:
+        npi = providers['PROVIDER_NPI'][ind]
+        fin = providers['FIN'][ind]
+        fname = providers['PROVIDER_FIRSTNAME'][ind]
+        lname = providers['PROVIDER_LASTNAME'][ind]
+        specialty = providers['PROVIDER_SPECIALTY'][ind]
+        discharge= providers['DISCH_DT_TM'][ind]
+        disp = providers['E_DISCH_DISPOSITION_DISP'][ind]
+        prev = providers['PREV_APPT'][ind]
+        next = providers['POST_APPT'][ind]
+        providerObj = {'fin':str(fin), 'npi':str(npi), 'fname':str(fname),'lname':str(lname),
+        'specialty':str(specialty),'discharge':str(discharge.strftime("%m/%d/%y")),'disp':str(disp), 'prev':str(prev),
+        'next':str(next)}
+        provider_array.append(providerObj)
+        
+    print(provider_array)
+    return json.dumps(provider_array)
 
 
 
@@ -121,6 +156,10 @@ def get_date(request):
 def getFin(request):
     fin = int(request["fin"])
     return fin
+
+def getNPI(request):
+    npi = int(request["NPI"])
+    return npi
 
 def getFirstLetter(request):
     first_letter = str(request["letter"])
@@ -154,5 +193,11 @@ def getProviderList():
     provider_list = getProviders(first_letter)
     return provider_list, 200
 
+@app.route('/patients', methods=['POST'])
+def getPatientList():
+    print('request', request.json)
+    npi = getNPI(request.json)
+    patient_list = getPatients(npi)
+    return patient_list, 200
 
 app.run(host='0.0.0.0', port=5000)
