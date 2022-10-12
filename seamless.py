@@ -87,6 +87,9 @@ def getCareTeamData(fin):
         
 
 def getProviders(letter):
+    if letter == '':
+        print('no letter')
+        return []
     providers = care_teams.loc[care_teams['PROVIDER_LASTNAME'].str.startswith(letter)].copy()
     providers.drop_duplicates(subset=['PROVIDER_NPI'], inplace=True)
     provider_array = []
@@ -97,7 +100,8 @@ def getProviders(letter):
         size = len(care_teams[care_teams['PROVIDER_NPI']== npi]['FIN'].unique())
         providerObj = {'id':str(id), 'npi':str(npi), 'name':str(name),'size':str(size)}
         provider_array.append(providerObj)
-
+        
+    print(provider_array)
     return json.dumps(provider_array)
 
 
@@ -145,6 +149,7 @@ def dischargeData():
 
 @app.route('/providers', methods=['POST'])
 def getProviderList():
+    print('request', request.json)
     first_letter = getFirstLetter(request.json)
     provider_list = getProviders(first_letter)
     return provider_list, 200
